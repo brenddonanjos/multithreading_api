@@ -1,7 +1,6 @@
 package service
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"io"
@@ -11,27 +10,20 @@ import (
 	"github.com/brenddonanjos/multithreading_api/internal/entity"
 )
 
-type BrasilApiService struct {
-	Ctx context.Context
-}
+type BrasilApiService struct{}
 
-func NewBrasilApiService(ctx context.Context) *BrasilApiService {
-	return &BrasilApiService{
-		Ctx: ctx,
-	}
+func NewBrasilApiService() *BrasilApiService {
+	return &BrasilApiService{}
 }
 
 func (ba *BrasilApiService) FetchZipCode(zipCode string, startTime time.Time) (zipCodeInfo *entity.ZipCode, err error) {
-	req, err := http.NewRequestWithContext(ba.Ctx, http.MethodGet, "https://brasilapi.com.br/api/cep/v1/"+zipCode, nil)
+	req, err := http.NewRequest(http.MethodGet, "https://brasilapi.com.br/api/cep/v1/"+zipCode, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		if ba.Ctx.Err() == context.DeadlineExceeded {
-			return nil, errors.New("request time limit exceeded (brasilapi)")
-		}
 		return nil, err
 	}
 	defer res.Body.Close()

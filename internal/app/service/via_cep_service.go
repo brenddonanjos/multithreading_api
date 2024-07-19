@@ -1,7 +1,6 @@
 package service
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"io"
@@ -11,26 +10,19 @@ import (
 	"github.com/brenddonanjos/multithreading_api/internal/entity"
 )
 
-type ViaCepService struct {
-	Ctx context.Context
-}
+type ViaCepService struct{}
 
-func NewViaCepService(ctx context.Context) *ViaCepService {
-	return &ViaCepService{
-		Ctx: ctx,
-	}
+func NewViaCepService() *ViaCepService {
+	return &ViaCepService{}
 }
 
 func (vc *ViaCepService) FetchZipCode(zipCode string, startTime time.Time) (zipCodeInfo *entity.ZipCode, err error) {
-	req, err := http.NewRequestWithContext(vc.Ctx, http.MethodGet, "https://viacep.com.br/ws/"+zipCode+"/json/", nil)
+	req, err := http.NewRequest(http.MethodGet, "https://viacep.com.br/ws/"+zipCode+"/json/", nil)
 	if err != nil {
 		return nil, err
 	}
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		if vc.Ctx.Err() == context.DeadlineExceeded {
-			return nil, errors.New("request time limit exceeded (viacep)")
-		}
 		return nil, err
 	}
 	defer res.Body.Close()
